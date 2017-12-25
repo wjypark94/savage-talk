@@ -36,9 +36,9 @@ class App extends React.Component {
         return (
             <div>
                 <h1> SAVAGE TALK </h1>
-                <input value/>
+                <input type="text" placeholder="Message"/>
                 <button onClick={this.sendMessage}> Send </button>
-                <h2> Buddy List </h2>
+                <h2> Friends List </h2>
                 <button onClick={this.addFriend}> Add Friend</button>
                 <button onClick={this.deleteFriend}> Delete Friend </button>
                 <h3> How do you feel </h3>
