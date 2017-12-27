@@ -1,51 +1,79 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import io from 'socket.io-client';
 
 class App extends React.Component {
-    constructor(props) {
-        super(props) 
-            this.state = {
-                
+    constructor(props){
+        super(props)
+          this.state = {
+              username: '',
+              message: '',
+              messages: []
+          };
+
+          this.socket = io('localhost:3000');
+
+          this.socket.on('RECEIVE_MESSAGE', function(data){
+            addMessage(data);
+            });
+
+          const addMessage = data => {
+            console.log(data);
+            this.setState({messages: [...this.state.messages, data]});
+            console.log(this.state.messages);
+            };
+
+
+          this.sendMessage = ev => {
+            ev.preventDefault();
+            this.socket.emit('SEND_MESSAGE', {
+                user: this.state.username,
+                message: this.state.message
+            });
+            this.setState({message: ''});
             }
-        this.sendMessage = this.sendMessage.bind(this);
-        this.addFriend = this.addFriend.bind(this);
-        this.deleteFriend = this.deleteFriend.bind(this);
-        this.sendEmojis = this.sendEmojis.bind(this);
         
-    }
-    sendMessage(){
-        console.log('Send message is working');
-    }
-
-    addFriend(){
-        console.log('Add a Friend is working');
+        this.handleUsername = this.handleUsername.bind(this);
+        this.handleMessage = this.handleMessage.bind(this);
     }
 
-    deleteFriend(){
-        console.log('Delete Friend is working')
+    handleUsername(event) {
+        this.setState({
+            username: event.target.value
+        })
     }
 
-    sendEmojis(){
-        console.log('Send an emoji is working')
+    handleMessage(event) {
+        this.setState({
+            message: event.target.value
+        })
     }
 
-    
 
-    render() {
+render(){
         return (
             <div>
                 <h1> SAVAGE TALK </h1>
-                <input type="text" placeholder="Message"/>
-                <button onClick={this.sendMessage}> Send </button>
-                <h2> Friends List </h2>
-                <button onClick={this.addFriend}> Add Friend</button>
-                <button onClick={this.deleteFriend}> Delete Friend </button>
-                <h3> How do you feel </h3>
-                <button onClick={this.sendEmojis}> Emojis </button>
-
+                <div>Global Room</div>
+                <hr/>
+                <div>
+                {this.state.messages.map((message, i)=> {
+                    return (
+                        <div key={i}>{message.user}: {message.message}</div>
+                    )
+                })}
+                </div>
+            
+        <div>
+                <input type="text" value={this.state.username} onChange={this.handleUsername} placeholder="Username"/>
+                <br/>
+                <input type="text" value={this.state.message} onChange={this.handleMessage} placeholder="Message"/>
+                <br/>
+                <button onClick={this.sendMessage}>Send</button>
             </div>
-        )
+            </div>
+        );
     }
 }
 
