@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import io from 'socket.io-client';
 
+
 class App extends React.Component {
     constructor(props){
         super(props)
@@ -56,7 +57,27 @@ render(){
             <div>
                 <h1> SAVAGE TALK </h1>
                 <div>Global Room</div>
-                <hr/>
+                <h2>
+                <div id="roomSelect">
+                  <select className ="roomList">
+                  <option value="lobby">lobby</option>
+                  </select>
+                </div>
+                </h2>
+                <h3>
+                <input type="text" placeholder="Chatroom..."/>
+                <br/>
+                <button className="addRoom" value="addRoom"> Add Room</button>
+                </h3>
+              
+            <div>
+                <input type="text" value={this.state.username} onChange={this.handleUsername} placeholder="Username"/>
+                <br/>
+                <input type="text" value={this.state.message} onChange={this.handleMessage} placeholder="Message"/>
+                <br/>
+                <button onClick={this.sendMessage}>Send</button>
+            </div>
+            <hr/>
                 <div>
                 {this.state.messages.map((message, i)=> {
                     return (
@@ -64,14 +85,6 @@ render(){
                     )
                 })}
                 </div>
-            
-        <div>
-                <input type="text" value={this.state.username} onChange={this.handleUsername} placeholder="Username"/>
-                <br/>
-                <input type="text" value={this.state.message} onChange={this.handleMessage} placeholder="Message"/>
-                <br/>
-                <button onClick={this.sendMessage}>Send</button>
-            </div>
             </div>
         );
     }
