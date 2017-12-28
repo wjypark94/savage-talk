@@ -2,8 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import io from 'socket.io-client';
+import axios from 'axios';
 
-
+const socketUrl = "http://localhost:3000";
 class App extends React.Component {
     constructor(props){
         super(props)
@@ -11,7 +12,9 @@ class App extends React.Component {
               username: '',
               message: '',
               messages: [],
-              rooms: []
+              rooms: [],
+              roomName: '',
+              value: ''
           };
 
           this.socket = io('localhost:3000');
@@ -21,9 +24,13 @@ class App extends React.Component {
             });
 
           const addMessage = data => {
-            console.log(data);
+            const name = data.user;
+            const content = data.message;
+            data = {
+                name: name,
+                content: content
+            }
             this.setState({messages: [...this.state.messages, data]});
-            console.log(this.state.messages);
             };
 
 
@@ -31,7 +38,8 @@ class App extends React.Component {
             ev.preventDefault();
             this.socket.emit('SEND_MESSAGE', {
                 user: this.state.username,
-                message: this.state.message
+                message: this.state.message,
+                roomName: this.state.value
             });
             this.setState({message: ''});
             }
@@ -40,18 +48,37 @@ class App extends React.Component {
         this.handleUsername = this.handleUsername.bind(this);
         this.handleMessage = this.handleMessage.bind(this);
         this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleChatRoom = this.handleChatRoom.bind(this);
+        this.addRoom = this.addRoom.bind(this);
+        this.getMessages = this.getMessages.bind(this);
     }
 
     componentWillMount(){
         //axios get request for all the rooms you have in database
         //then do set state, set rooms to the data you get back
         //response is data youre getting from database
-        axios.get("http://localhost:3000").then(function(response){
-            this.setState({
-                rooms: response
-            })
+        const context = this;
+        axios.get("http://localhost:3000/rooms").then(function(response){
+            if (response.data === null) {
+                context.setState({
+                    rooms: []
+                })
+            } else {
+                context.setState({
+                    rooms: response.data
+                })
+            }
         })
+        this.initSocket();
+    }
+
+    initSocket (){
+        const socket = io(socketUrl);
+        socket.on('connect', ()=>{
+            console.log("Connected");
+        })
+        this.setState({socket})
+
     }
 
     handleUsername(event) {
@@ -66,13 +93,47 @@ class App extends React.Component {
         })
     }
 
+    getMessages() {
+        const context = this;
+        axios.post('http://localhost:3000/messages', {roomName: this.state.value}).then(function(response) {
+            console.log('this is messages data', response.data )
+            if (response.data === null) {
+                context.setState({
+                    messages: []
+                })
+            } else {
+                context.setState({
+                    messages: response.data
+                })
+            }
+        })
+    }
+
     handleChange(event) {
+        const context = this;
         this.setState({
             value: event.target.value
+        }, this.getMessages);       
+    }
+     
+    handleChatRoom(event) {
+        this.setState({
+            roomName: event.target.value
         });
     }
 
     addRoom(){
+        const context = this;
+        axios.post("http://localhost:3000/rooms", 
+        {
+            name: this.state.roomName
+        }).then(function(response){
+            axios.get("http://localhost:3000/rooms").then(function(response) {
+                context.setState({
+                    rooms: response.data
+                })
+            })
+        })
 
     }
 
@@ -84,19 +145,22 @@ render(){
                 <div>Channel List</div>
                 <h2>
                 <div id="roomSelect">
-                  <select className ="roomList" onChange={this.handleChange} value={this.state.value}>
-                  
-                  {this.state.rooms.map((room, i)=>{
-                      <option value={room.name}>{room.name}</option>
-                  })}
+                  <select className ="roomList" value={this.state.value} onChange={this.handleChange}>
+                  {/* <option value="lobbly">Loblly</option>
+                  <option value="asdfa">SDFSDF</option> */}
+                  {this.state.rooms.map((room, i)=> (
+                    <option key={i} value={room.name}>{room.name}</option>
+                  ))}
              
                   </select>
                 </div>
                 </h2>
                 <h3>
-                <input type="text" value={this.state.value} onChange={this.handleChange} placeholder="Chatroom..."/>
+                <input type="text" value={this.state.roomName} onChange={this.handleChatRoom} placeholder="Chatroom..."/>
                 <br/>
-                <button onClick={this.handleSubmit}>Join Room</button>
+                <button onClick={this.addRoom}>Create Room</button>
+                <br/>
+              
                 </h3>
                 <div>
 
@@ -113,7 +177,7 @@ render(){
                 <div>
                 {this.state.messages.map((message, i)=> {
                     return (
-                        <div key={i}>{message.user}: {message.message}</div>
+                        <div key={i}>{message.name}: {message.content}</div>
                     )
                 })}
                 </div>
