@@ -11,7 +11,7 @@ class App extends React.Component {
               username: '',
               message: '',
               messages: [],
-              value: ''
+              rooms: []
           };
 
           this.socket = io('localhost:3000');
@@ -43,6 +43,17 @@ class App extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
+    componentWillMount(){
+        //axios get request for all the rooms you have in database
+        //then do set state, set rooms to the data you get back
+        //response is data youre getting from database
+        axios.get("http://localhost:3000").then(function(response){
+            this.setState({
+                rooms: response
+            })
+        })
+    }
+
     handleUsername(event) {
         this.setState({
             username: event.target.value
@@ -61,9 +72,8 @@ class App extends React.Component {
         });
     }
 
-    handleSubmit(event){
-        alert('A room was created: ' + this.state.value);
-        event.preventDefault();
+    addRoom(){
+
     }
 
 
@@ -71,13 +81,15 @@ render(){
         return (
             <div>
                 <h1> SAVAGE TALK </h1>
-                <div>Channel</div>
+                <div>Channel List</div>
                 <h2>
                 <div id="roomSelect">
                   <select className ="roomList" onChange={this.handleChange} value={this.state.value}>
-                  <option value="lobby">lobby</option>
-                  <option value="friends">friends</option>
-
+                  
+                  {this.state.rooms.map((room, i)=>{
+                      <option value={room.name}>{room.name}</option>
+                  })}
+             
                   </select>
                 </div>
                 </h2>
