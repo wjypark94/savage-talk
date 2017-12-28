@@ -10,7 +10,8 @@ class App extends React.Component {
           this.state = {
               username: '',
               message: '',
-              messages: []
+              messages: [],
+              value: ''
           };
 
           this.socket = io('localhost:3000');
@@ -34,9 +35,12 @@ class App extends React.Component {
             });
             this.setState({message: ''});
             }
+            
         
         this.handleUsername = this.handleUsername.bind(this);
         this.handleMessage = this.handleMessage.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     handleUsername(event) {
@@ -51,24 +55,40 @@ class App extends React.Component {
         })
     }
 
+    handleChange(event) {
+        this.setState({
+            value: event.target.value
+        });
+    }
+
+    handleSubmit(event){
+        alert('A room was created: ' + this.state.value);
+        event.preventDefault();
+    }
+
 
 render(){
         return (
             <div>
                 <h1> SAVAGE TALK </h1>
-                <div>Global Room</div>
+                <div>Channel</div>
                 <h2>
                 <div id="roomSelect">
-                  <select className ="roomList">
+                  <select className ="roomList" onChange={this.handleChange} value={this.state.value}>
                   <option value="lobby">lobby</option>
+                  <option value="friends">friends</option>
+
                   </select>
                 </div>
                 </h2>
                 <h3>
-                <input type="text" placeholder="Chatroom..."/>
+                <input type="text" value={this.state.value} onChange={this.handleChange} placeholder="Chatroom..."/>
                 <br/>
-                <button className="addRoom" value="addRoom"> Add Room</button>
+                <button onClick={this.handleSubmit}>Join Room</button>
                 </h3>
+                <div>
+
+                </div>
               
             <div>
                 <input type="text" value={this.state.username} onChange={this.handleUsername} placeholder="Username"/>

@@ -22,6 +22,7 @@ io.on('connection', (socket) => {
     socket.on('SEND_MESSAGE', function(data){ 
         io.emit('RECEIVE_MESSAGE', data);
      }) 
+     
 });
 
 //emiting the info we received from the client(author and message) and we are sending it to everyone else
