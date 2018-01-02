@@ -7,4 +7,5 @@ const router = express.Router();
 router.get('/rooms', controllers.getRooms);
 router.post('/rooms', controllers.addRoom);
 router.post('/messages', controllers.getMessages);
+router.delete('/rooms', controllers.removeAllRooms);
 module.exports = router;

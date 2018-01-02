@@ -18,6 +18,7 @@ exports.addRoom = function(req, res) {
     })
 };
 
+
 exports.getMessages = function(req, res) {
     console.log('this is noomName', req.body.roomName)
     const subquery = `SELECT id FROM rooms WHERE name='${req.body.roomName}'`;
@@ -28,3 +29,24 @@ exports.getMessages = function(req, res) {
     });
 };
 
+exports.removeAllRooms = function(req, res) {
+    const sql = 'DELETE FROM rooms';
+    const sqlmessage = 'DELETE FROM messages';
+    db.query(sql, function(err, data) {
+        res.send('deleted from database');
+    })
+    db.query(sqlmessage, function(err, data){
+        res.send('deleted message from database');
+    })
+};
+
+exports.removeRoom = function(req, res) {
+    const subquery = `SELECT id from rooms WHERE name='${req.body.roomName}'`;
+    const sql = `DELETE from messages WHERE roomID=(${subquery})`;
+    const sql2 = `DELETE from rooms where name='${req.body.roomName}'`;
+    db.query(sql, function(err, data) {
+        db.query(sql2, function(err, data) {
+            res.send('deleted from database')
+        });
+    });
+};

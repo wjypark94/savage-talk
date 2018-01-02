@@ -51,6 +51,7 @@ class App extends React.Component {
         this.handleChatRoom = this.handleChatRoom.bind(this);
         this.addRoom = this.addRoom.bind(this);
         this.getMessages = this.getMessages.bind(this);
+        this.removeAllRooms = this.removeAllRooms.bind(this);
     }
 
     componentWillMount(){
@@ -137,6 +138,33 @@ class App extends React.Component {
 
     }
 
+    removeRoom(){
+        const context = this;
+        axios.delete("http://localhost:3000/rooms", 
+        {
+            name: this.state.roomName
+        }).then(function(response){
+            axios.get("http://localhost:3000/rooms").then(function(response) {
+                context.setState({
+                    rooms: response.data
+                })
+            })
+        })  
+    }
+
+    removeAllRooms(){
+        const context = this;
+        axios.delete("http://localhost:3000/rooms", 
+        {
+            name: this.state.roomName
+        }).then(function(response){
+            axios.get("http://localhost:3000/rooms").then(function(response) {
+                context.setState({
+                    rooms: response.data
+                })
+            })
+        })  
+    }
 
 render(){
         return (
@@ -146,8 +174,6 @@ render(){
                 <h2>
                 <div id="roomSelect">
                   <select className ="roomList" value={this.state.value} onChange={this.handleChange}>
-                  {/* <option value="lobbly">Loblly</option>
-                  <option value="asdfa">SDFSDF</option> */}
                   {this.state.rooms.map((room, i)=> (
                     <option key={i} value={room.name}>{room.name}</option>
                   ))}
@@ -160,7 +186,9 @@ render(){
                 <br/>
                 <button onClick={this.addRoom}>Create Room</button>
                 <br/>
-              
+                <button onClick={this.removeRoom}>Leave Room</button>
+                <br/>
+                <button onClick={this.removeAllRooms}>Leave All Rooms</button>
                 </h3>
                 <div>
 
