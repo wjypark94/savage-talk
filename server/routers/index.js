@@ -8,4 +8,5 @@ router.get('/rooms', controllers.getRooms);
 router.post('/rooms', controllers.addRoom);
 router.post('/messages', controllers.getMessages);
 router.delete('/rooms', controllers.removeAllRooms);
+router.post('/room', controllers.removeRoom);
 module.exports = router;

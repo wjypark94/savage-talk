@@ -14,7 +14,6 @@ class App extends React.Component {
               messages: [],
               rooms: [],
               roomName: '',
-              value: ''
           };
 
           this.socket = io('localhost:3000');
@@ -39,7 +38,7 @@ class App extends React.Component {
             this.socket.emit('SEND_MESSAGE', {
                 user: this.state.username,
                 message: this.state.message,
-                roomName: this.state.value
+                roomName: this.state.roomName
             });
             this.setState({message: ''});
             }
@@ -51,6 +50,7 @@ class App extends React.Component {
         this.handleChatRoom = this.handleChatRoom.bind(this);
         this.addRoom = this.addRoom.bind(this);
         this.getMessages = this.getMessages.bind(this);
+        this.removeRoom = this.removeRoom.bind(this);
         this.removeAllRooms = this.removeAllRooms.bind(this);
     }
 
@@ -71,6 +71,10 @@ class App extends React.Component {
             }
         })
         this.initSocket();
+    }
+
+    componentDidMount() {
+        console.log(this.state.roomName)
     }
 
     initSocket (){
@@ -96,7 +100,7 @@ class App extends React.Component {
 
     getMessages() {
         const context = this;
-        axios.post('http://localhost:3000/messages', {roomName: this.state.value}).then(function(response) {
+        axios.post('http://localhost:3000/messages', {roomName: this.state.roomName}).then(function(response) {
             console.log('this is messages data', response.data )
             if (response.data === null) {
                 context.setState({
@@ -112,8 +116,9 @@ class App extends React.Component {
 
     handleChange(event) {
         const context = this;
+        console.log("handle change working", event.target.value)
         this.setState({
-            value: event.target.value
+            roomName: event.target.value
         }, this.getMessages);       
     }
      
@@ -139,29 +144,27 @@ class App extends React.Component {
     }
 
     removeRoom(){
+        console.log('remoove room hitting', this.state.roomName)
         const context = this;
-        axios.delete("http://localhost:3000/rooms", 
+        axios.post("http://localhost:3000/room", 
         {
-            name: this.state.roomName
+            roomName: this.state.roomName
         }).then(function(response){
             axios.get("http://localhost:3000/rooms").then(function(response) {
                 context.setState({
-                    rooms: response.data
-                })
+                    rooms: response.data, 
+                    messages:[] 
+                });
             })
         })  
     }
 
     removeAllRooms(){
         const context = this;
-        axios.delete("http://localhost:3000/rooms", 
-        {
-            name: this.state.roomName
-        }).then(function(response){
-            axios.get("http://localhost:3000/rooms").then(function(response) {
-                context.setState({
-                    rooms: response.data
-                })
+        axios.delete("http://localhost:3000/rooms").then(function(response){
+            context.setState({
+                rooms: [],
+                messages: []
             })
         })  
     }
@@ -173,7 +176,7 @@ render(){
                 <div>Channel List</div>
                 <h2>
                 <div id="roomSelect">
-                  <select className ="roomList" value={this.state.value} onChange={this.handleChange}>
+                  <select className ="roomList" value={this.state.roomName} onChange={this.handleChange}>
                   {this.state.rooms.map((room, i)=> (
                     <option key={i} value={room.name}>{room.name}</option>
                   ))}
@@ -185,10 +188,8 @@ render(){
                 <input type="text" value={this.state.roomName} onChange={this.handleChatRoom} placeholder="Chatroom..."/>
                 <br/>
                 <button onClick={this.addRoom}>Create Room</button>
-                <br/>
                 <button onClick={this.removeRoom}>Leave Room</button>
-                <br/>
-                <button onClick={this.removeAllRooms}>Leave All Rooms</button>
+                <button onClick={this.removeAllRooms}>Delete All Rooms</button>
                 </h3>
                 <div>
 
