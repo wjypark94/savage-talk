@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import io from 'socket.io-client';
 import axios from 'axios';
+/*import MyEmojiInput from './components/emoji.jsx';*/
+
 
 const socketUrl = "http://localhost:3000";
 class App extends React.Component {
