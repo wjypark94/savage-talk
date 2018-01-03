@@ -52,6 +52,7 @@ class App extends React.Component {
         this.getMessages = this.getMessages.bind(this);
         this.removeRoom = this.removeRoom.bind(this);
         this.removeAllRooms = this.removeAllRooms.bind(this);
+        this.addPrivateRoom = this.addPrivateRoom.bind(this);
     }
 
     componentWillMount(){
@@ -60,6 +61,22 @@ class App extends React.Component {
         //response is data youre getting from database
         const context = this;
         axios.get("http://localhost:3000/rooms").then(function(response){
+            if (response.data === null) {
+                context.setState({
+                    rooms: []
+                })
+            } else {
+                context.setState({
+                    rooms: response.data
+                })
+            }
+        })
+        this.initSocket();
+    }
+
+    componentWillMount(){
+        const context = this;
+        axios.get("http://localhost:3000/privaterooms").then(function(response){
             if (response.data === null) {
                 context.setState({
                     rooms: []
@@ -143,6 +160,20 @@ class App extends React.Component {
 
     }
 
+    addPrivateRoom(){
+        const context = this;
+        axios.post("http://localhost:3000/privaterooms", 
+        {
+            name: this.state.roomName
+        }).then(function(response){
+            axios.get("http://localhost:3000/privaterooms").then(function(response) {
+                context.setState({
+                    rooms: response.data
+                })
+            })
+        })
+    }
+
     removeRoom(){
         console.log('remoove room hitting', this.state.roomName)
         const context = this;
@@ -191,11 +222,14 @@ render(){
                 <button onClick={this.removeRoom}>Leave Room</button>
                 <button onClick={this.removeAllRooms}>Delete All Rooms</button>
                 </h3>
+                <br/>
+                <input type="text" value={this.state.roomName} onChange={this.handleChatRoom} placeholder="Create Private"/>
+                <button onClick={this.addPrivateRoom}>Create Private</button>
                 <div>
-
                 </div>
               
             <div>
+                <br/>
                 <input type="text" value={this.state.username} onChange={this.handleUsername} placeholder="Username"/>
                 <br/>
                 <input type="text" value={this.state.message} onChange={this.handleMessage} placeholder="Message"/>

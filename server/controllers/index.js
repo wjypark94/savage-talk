@@ -18,6 +18,14 @@ exports.addRoom = function(req, res) {
     })
 };
 
+exports.addPrivateRoom = function(req, res) {
+    console.log('this is req.body', req.body)
+    const sql = `INSERT INTO rooms (name) VALUES ('${req.body.name}')`;
+    db.query(sql, function(err, data){
+        res.send('posted into database');
+    })
+};
+
 
 exports.getMessages = function(req, res) {
     console.log('this is roomName', req.body.roomName)
