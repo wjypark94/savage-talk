@@ -20,9 +20,9 @@ exports.addRoom = function(req, res) {
 
 exports.addPrivateRoom = function(req, res) {
     console.log('this is req.body', req.body)
-    const sql = `INSERT INTO rooms (name) VALUES ('${req.body.name}')`;
+    const sql = `INSERT INTO rooms (name, password) VALUES ('${req.body.name}', '${req.body.password}')`;
     db.query(sql, function(err, data){
-        res.send('posted into database');
+        res.send('saved to room and password to database')
     })
 };
 
@@ -56,5 +56,13 @@ exports.removeRoom = function(req, res) {
         db.query(sql2, function(err, data) {
             res.send('deleted from database')
         });
+    });
+};
+
+exports.checkPrivateRoom = function(req, res) {
+    console.log('check private is hitting', req.body.roomName);
+    const sql = `SELECT password from rooms WHERE name='${req.body.roomName}'`;
+    db.query(sql, function(err, data){
+        res.json(data)
     });
 };

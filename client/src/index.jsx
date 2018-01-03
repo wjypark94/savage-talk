@@ -14,6 +14,8 @@ class App extends React.Component {
               messages: [],
               rooms: [],
               roomName: '',
+              password: '',
+              privateRoomName: ''
           };
 
           this.socket = io('localhost:3000');
@@ -53,6 +55,9 @@ class App extends React.Component {
         this.removeRoom = this.removeRoom.bind(this);
         this.removeAllRooms = this.removeAllRooms.bind(this);
         this.addPrivateRoom = this.addPrivateRoom.bind(this);
+        this.handlePassword = this.handlePassword.bind(this);
+        this.checkPassword = this.checkPassword.bind(this);
+        this.handlePrivateChatRoom = this.handlePrivateChatRoom.bind(this);
     }
 
     componentWillMount(){
@@ -61,22 +66,6 @@ class App extends React.Component {
         //response is data youre getting from database
         const context = this;
         axios.get("http://localhost:3000/rooms").then(function(response){
-            if (response.data === null) {
-                context.setState({
-                    rooms: []
-                })
-            } else {
-                context.setState({
-                    rooms: response.data
-                })
-            }
-        })
-        this.initSocket();
-    }
-
-    componentWillMount(){
-        const context = this;
-        axios.get("http://localhost:3000/privaterooms").then(function(response){
             if (response.data === null) {
                 context.setState({
                     rooms: []
@@ -114,21 +103,56 @@ class App extends React.Component {
             message: event.target.value
         })
     }
+    
+    checkPassword(input, realPassword) {
+        const context = this;
+        if (input === realPassword) {
+            axios.post('http://localhost:3000/messages', {roomName: this.state.roomName}).then(function(response) {
+                console.log('this is messages data', response.data )
+                if (response.data === null) {
+                    context.setState({
+                        messages: []
+                    })
+                } else {
+                    context.setState({
+                        messages: response.data
+                    })
+                }
+            })    
+        } else {
+            let input = prompt('Invalid! Please Enter Password');
+            if (input != null) {
+                this.checkPassword(password, realPassword);
+            }
+        }
+
+    }
 
     getMessages() {
+        console.log('get messages is hitting')
         const context = this;
-        axios.post('http://localhost:3000/messages', {roomName: this.state.roomName}).then(function(response) {
-            console.log('this is messages data', response.data )
-            if (response.data === null) {
-                context.setState({
-                    messages: []
+        axios.post('http://localhost:3000/privateroom', {roomName: this.state.roomName}).then(function(response){
+            console.log('this is data', response.data[0].password);
+            if (response.data[0].password === null){
+                axios.post('http://localhost:3000/messages', {roomName: context.state.roomName}).then(function(response) {
+                    console.log('this is messages data', response.data )
+                    if (response.data === null) {
+                        context.setState({
+                            messages: []
+                        })
+                    } else {
+                        context.setState({
+                            messages: response.data
+                        })
+                    }
                 })
             } else {
-                context.setState({
-                    messages: response.data
-                })
+                let input = prompt("Please Enter Password");
+                if (input != null) {
+                    context.checkPassword(input, response.data[0].password);
+                }    
             }
-        })
+        });
     }
 
     handleChange(event) {
@@ -145,11 +169,24 @@ class App extends React.Component {
         });
     }
 
+    handlePrivateChatRoom(event){
+        this.setState({
+            privateRoomName: event.target.value
+        });
+    }
+
+    handlePassword(event){
+        this.setState({
+            password: event.target.value
+        });
+    }
+
     addRoom(){
         const context = this;
         axios.post("http://localhost:3000/rooms", 
         {
-            name: this.state.roomName
+            name: this.state.roomName,
+            password: this.state.password
         }).then(function(response){
             axios.get("http://localhost:3000/rooms").then(function(response) {
                 context.setState({
@@ -164,9 +201,10 @@ class App extends React.Component {
         const context = this;
         axios.post("http://localhost:3000/privaterooms", 
         {
-            name: this.state.roomName
+            name: this.state.privateRoomName,
+            password: this.state.password
         }).then(function(response){
-            axios.get("http://localhost:3000/privaterooms").then(function(response) {
+            axios.get("http://localhost:3000/rooms").then(function(response) {
                 context.setState({
                     rooms: response.data
                 })
@@ -175,7 +213,7 @@ class App extends React.Component {
     }
 
     removeRoom(){
-        console.log('remoove room hitting', this.state.roomName)
+        console.log('remove room hitting', this.state.roomName)
         const context = this;
         axios.post("http://localhost:3000/room", 
         {
@@ -223,7 +261,10 @@ render(){
                 <button onClick={this.removeAllRooms}>Delete All Rooms</button>
                 </h3>
                 <br/>
-                <input type="text" value={this.state.roomName} onChange={this.handleChatRoom} placeholder="Create Private"/>
+                <input type="text" value={this.state.privateRoomName} onChange={this.handlePrivateChatRoom} placeholder="Create Private"/>
+                <br/>
+                <input type="text" value={this.state.password} onChange={this.handlePassword} placeholder="Create Password"/>
+                <br/>
                 <button onClick={this.addPrivateRoom}>Create Private</button>
                 <div>
                 </div>

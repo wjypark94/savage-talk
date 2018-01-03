@@ -10,6 +10,6 @@ router.post('/messages', controllers.getMessages);
 router.delete('/rooms', controllers.removeAllRooms);
 router.post('/room', controllers.removeRoom);
 router.post('/privaterooms', controllers.addPrivateRoom);
-router.get('/privaterooms', controllers.getRooms);
+router.post('/privateroom', controllers.checkPrivateRoom);
 
 module.exports = router;
